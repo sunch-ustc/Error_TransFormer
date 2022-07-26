@@ -37,7 +37,7 @@ parser.add_argument("--data_dir", dest='data_dir',
       default="~/ILSVRC2012_img_val" ,  type=str,help="The path of ILSVRC2012_img_val")
 parser.add_argument("--root_path" ,  default="~/" ,type=str, help="The path of root")
 args = parser.parse_args() 
- 
+
 def main(): 
  
     """Config""" 

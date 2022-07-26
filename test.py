@@ -41,7 +41,7 @@ class test_dataset(Dataset):
         self.seed=seed
         self.img_sum=img_sum        #一共挑取多少张图片
         self.img_num=img_num        #每个类别挑选的图像数量
-        label_csv = open(os.path.join(self.p0['root_path'],'/data/imagenet_label.csv'), 'r')
+        label_csv = open(os.path.join(self.p0['root_path'],'data/imagenet_label.csv'), 'r')
         label_reader = csv.reader(label_csv)
         label_ls = list(label_reader)
         self.label_ls = label_ls
@@ -51,7 +51,7 @@ class test_dataset(Dataset):
             label[i[0]] = (i[1:],index)
             index+=1
         self.label=label
-        data_csv = open(data_csv_dir, 'r')
+        data_csv = open( os.path.join(self.p0['root_path'],'data/selected_data.csv') , 'r')
         csvreader = csv.reader(data_csv)
         data_ls = list(csvreader)
         self.imgs = self.prep_imgs_dir(data_ls)
@@ -63,7 +63,7 @@ class test_dataset(Dataset):
         return imgs_ls
     def img_ls(self, data_ls, sel_ls):# 该函数将图片一张张储存到imgs_ls中
         imgs_ls = []
-        selected_data_csv = open(os.path.join(self.p0['root_path'],'/data/csv/test_data.csv'), 'r')
+        selected_data_csv = open(os.path.join(self.p0['root_path'],'data/csv/test_data.csv'), 'r')
         csvreader = csv.reader(selected_data_csv)
         a=list(csvreader)
         index_num=0
