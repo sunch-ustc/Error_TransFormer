@@ -19,7 +19,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 # Parser
 import argparse
 from utils.utils import mkdir_if_missing
-parser = argparse.ArgumentParser( )
+parser = argparse.ArgumentParser( ) 
+ 
 parser.add_argument("--img_sum", dest='img_sum',  type=int,help="The number of images")
 parser.add_argument("--img_num", dest='img_num',  type=int,help="The number of per categary")
 parser.add_argument("--batch_size", dest='batch_size',  type=int,help="batch_size")
@@ -29,23 +30,20 @@ parser.add_argument("--attack",  type=str,help="The method of training model. op
 parser.add_argument("--temperature",  type=float,default=0.5)
 parser.add_argument("--seed",  type=int,default=0)
 parser.add_argument("--epochs",  type=int,default=500)
-parser.add_argument("--group",  type=int,default=0)
-parser.add_argument("--pretext_dir", dest='pretext_dir', 
-      default="/home/common/sunch/Error_TransFormer/results/our_data" ,  type=str,help="pretext_dir")
+parser.add_argument("--group",  type=int,default=0) 
 parser.add_argument("--pretext_checkpoint", dest='pretext_checkpoint', 
-      default="/home/common/sunch/Error_TransFormer/results/our_data/checkpoint.pth.tar" ,  type=str,help="pretext_checkpoint")
+      default="~/results/our_data/checkpoint.pth.tar" ,  type=str,help="pretext_checkpoint")
 parser.add_argument("--data_dir", dest='data_dir', 
-      default="/home/common/sunch/ILSVRC2012_img_val" ,  type=str,help="The path of ILSVRC2012_img_val")
-
+      default="~/ILSVRC2012_img_val" ,  type=str,help="The path of ILSVRC2012_img_val")
+parser.add_argument("--root_path" ,  default="~/" ,type=str, help="The path of root")
 args = parser.parse_args() 
-mkdir_if_missing(args.pretext_dir )
+ 
 def main(): 
-    
+ 
     """Config""" 
-    torch.backends.cudnn.benchmark = True
-    config_env='/home/common/sunch/Error_TransFormer/configs/env.yml' 
-    config_exp='/home/common/sunch/Error_TransFormer/configs/test/Train_model.yml'
-    p = create_config(config_env,config_exp) 
+    torch.backends.cudnn.benchmark = True  
+    config_exp=os.path.join(args.root_path,'configs/Train_model.yml' )  
+    p = create_config( config_exp) 
     for arg in vars(args):
         if getattr(args, arg) is None:
             continue
@@ -118,8 +116,7 @@ def main():
     with open('result.txt', 'a') as f:  
         f.writelines(store)
         f.writelines(store1)
-        f.writelines('\n')
-    torch.save(model.state_dict(), p['pretext_model'])
+        f.writelines('\n') 
 
 if __name__ == '__main__': 
     main()

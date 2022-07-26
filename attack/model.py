@@ -10,8 +10,7 @@ import pdb #pdb.set_trace()
  
 import torchvision.transforms as T
 import numpy as np
-from robustness import model_utils 
-from robustness.datasets import ImageNet
+ 
  
 import torch
  
@@ -45,19 +44,7 @@ class Advtrain(torch.nn.Module):
             features=features[0]
             return features
 def defend_model(string):
-    if string=='adv_trained':
-        ds = ImageNet(' /data/linshiqi047/imagenet/val')
-        model, _ = model_utils.make_and_restore_model(arch='resnet50', dataset=ds,pytorch_pretrained=True)  #
-        #print(torch.load('imagenet_linf_4.pt').keys())
-        model=Advtrain(model)
-        #print(model)
-        model.load_state_dict(torch.load('/home/common/sunch/unsupervised-1/imagenet_linf_8.pt')['model'])
-    elif string=='adv_trained4':
-        ds = ImageNet(' /data/linshiqi047/imagenet/val')
-        model, _ = model_utils.make_and_restore_model(arch='resnet50', dataset=ds,pytorch_pretrained=True)  #
-        #print(torch.load('imagenet_linf_4.pt').keys())
-        model=Advtrain(model) 
-        model.load_state_dict(torch.load('/home/common/sunch/unsupervised-1/imagenet_linf_4.pt')['model'])
+ 
         
     if string=='vgg19_bn':
         model=models.vgg19_bn(pretrained=True)  

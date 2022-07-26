@@ -48,7 +48,7 @@ if __name__ == '__main__':
     test_data_csv = open(csv_path, 'w')
     test_data_writer = csv.writer(test_data_csv)
     
-    dataset_dir = '/home/common/sunch/ILSVRC2012_img_val'
+    dataset_dir = '~/ILSVRC2012_img_val'
     dataset = torchvision.datasets.ImageFolder(dataset_dir)
     label_ind = torch.randperm(1000).numpy()
     selected_labels_ls = np.array(dataset.classes)[label_ind]

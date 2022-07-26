@@ -24,11 +24,11 @@ from test import test_function
 from PIL import ImageFile
  
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-def main(p,path_save_adv_image='/home/common/sunch/Error_TransFormer/image_adv',seed=0,layer=["layer1"], 
-            path_feature_extractor="/home/common/sunch/Error_TransFormer/results/resnet/resnet18_1w.pth.tar"  ):
+def main(p,path_save_adv_image='~/image_adv',seed=0,layer=["layer1"]  
+               ):
     
     torch.backends.cudnn.benchmark = True 
-    print(path_feature_extractor)
+    print(p['pretext_checkpoint'])
     print(p["backbone"])
     print(p["attack_method"])
     attack_method=p["attack_method"]
@@ -57,7 +57,7 @@ def main(p,path_save_adv_image='/home/common/sunch/Error_TransFormer/image_adv',
     model = torch.nn.DataParallel(model) 
     myexactor.cuda()
     myexactor = torch.nn.DataParallel(myexactor)  
-    checkpoint = torch.load(path_feature_extractor, map_location='cpu') 
+    checkpoint = torch.load(p['pretext_checkpoint'], map_location='cpu') 
     model.load_state_dict(checkpoint['model'])
     
     for para in model.parameters():
@@ -98,8 +98,8 @@ def main(p,path_save_adv_image='/home/common/sunch/Error_TransFormer/image_adv',
 
 parser = argparse.ArgumentParser( )
 if __name__ == '__main__':
-    parser.add_argument("--path_save_adv_image", default="/home/common/sunch/Error_TransFormer/images/image_adv" ,  type=str)
-    parser.add_argument("--path_feature_extractor",default="/home/common/sunch/Error_TransFormer/results/ETF-I/I-resnet10_1k_seed1.pth.tar" ,  type=str)
+    parser.add_argument("--path_save_adv_image", default="~/Error_TransFormer_bithub/images/image_adv" ,  type=str)
+    parser.add_argument("--pretext_checkpoint",default="~/Error_TransFormer_bithub/results/ETF-I/I-resnet10_1k_seed1.pth.tar" ,  type=str)
     parser.add_argument("--backbone",             default="resnet10" ,  type=str)
     parser.add_argument("--attack",             default="ETF-I" ,  type=str)
     parser.add_argument("--features_dim",     default=1000 ,  type=int)
@@ -114,18 +114,19 @@ if __name__ == '__main__':
     parser.add_argument("--attack_method",       default="ETF_PGD",  type=str )
     parser.add_argument("--log_path",       default='./result.txt',  type=str )
     parser.add_argument("--data_dir", dest='data_dir', 
-      default="/home/common/sunch/ILSVRC2012_img_val" ,  type=str,help="The path of ILSVRC2012_img_val")
+      default="~/ILSVRC2012_img_val" ,  type=str,help="The path of ILSVRC2012_img_val")
+    parser.add_argument("--root_path" ,  default="~/" ,type=str, help="The path of root")
     args = parser.parse_args()
     print(args)
     
-    config_env='/home/common/sunch/Error_TransFormer/configs/env.yml' 
-    config_exp='/home/common/sunch/Error_TransFormer/configs/test/ETF_Attack.yml'
-    p = create_config(config_env,config_exp)
+    config_exp=os.path.join(args.root_path,'configs/ETF_Attack.yml')
+ 
+    p = create_config(config_exp)
     
     """ """
-    path_save_adv_image   =       args.path_save_adv_image  
+    path_save_adv_image   =       os.path.join(args.root_path, '/images/image_adv')  
     p["backbone"]         =       args.backbone  
-    path_feature_extractor=       args.path_feature_extractor  
+    p['pretext_checkpoint']=       args.pretext_checkpoint  
     p["attack"]           =       args.attack
     p["features_dim"]     =       args.features_dim
     p["criterion_kwargs"]["temperature"]=args.temperature 
@@ -137,11 +138,12 @@ if __name__ == '__main__':
     p["beta"]            =       args.beta 
     p["attack_method"]   =       args.attack_method 
     p["data_dir"]         =       args.data_dir 
+    p["root_path"]         =       args.root_path 
     log_path             =       args.log_path
      
  
-    main(p,path_feature_extractor=path_feature_extractor,seed=p["seed"],path_save_adv_image=path_save_adv_image  ) 
+    main(p, seed=p["seed"],path_save_adv_image=path_save_adv_image  ) 
 
      
-    test_function(c1=['vgg19_bn','inception_v3','resnet152', 'densenet161','squeezenet1_0','WRN','mobilenet_v2'],#'resnet50',"adv_trained4","adv_trained"  ,"adv_trained"  'vgg19_bn','inception_v3','resnet152', 'densenet161','squeezenet1_0','WRN','mobilenet_v2'],
+    test_function(p0=p,c1=['vgg19_bn','inception_v3','resnet152', 'densenet161','squeezenet1_0','WRN','mobilenet_v2'],#'resnet50',"adv_trained4","adv_trained"  ,"adv_trained"  'vgg19_bn','inception_v3','resnet152', 'densenet161','squeezenet1_0','WRN','mobilenet_v2'],
         path_save_adv_image=path_save_adv_image,group=p["group"],seed=p["seed"],img_sum=p["img_sum"],img_num=p["img_num"],log_path=log_path  )

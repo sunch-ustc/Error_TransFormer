@@ -59,17 +59,18 @@ class SimCLRLoss(nn.Module):
 
 class OUR_dataset(Dataset):
     def __init__(self, p,  mode:str, img_num:tuple or int, transform,img_sum:int,data_dir='  /data/linshiqi047/imagenet/val'
-            ,seed=0,data_csv_dir='/home/common/sunch/Error_TransFormer/data/selected_data_my.csv'):
+            ,seed=0,data_csv_dir='~/Error_TransFormer_bithub/data/selected_data_my.csv'):
         assert mode in ['train', 'val', 'base'], 'WRONG DATASET MODE' 
         super(OUR_dataset).__init__()
         self.mode = mode
         self.group=p["group"]
         self.transform=transform
+        self.p=p
         self.data_dir = data_dir
         self.seed= seed
         self.img_sum=img_sum        #The number of images
         self.img_num=img_num        #The number of per categary
-        label_csv = open('/home/common/sunch/Error_TransFormer/data/imagenet_label.csv', 'r')
+        label_csv = open(os.path.join(p["root_path"],'data/imagenet_label.csv'), 'r')
         label_reader = csv.reader(label_csv)
         label_ls = list(label_reader)
         self.label_ls = label_ls
@@ -97,7 +98,7 @@ class OUR_dataset(Dataset):
         return imgs_ls
     def img_ls(self, data_ls, sel_ls): 
         imgs_ls = []
-        selected_data_csv = open('/home/common/sunch/Error_TransFormer/data/selected_data_my.csv', 'r')
+        selected_data_csv = open(os.path.join(self.p["root_path"],'data/selected_data.csv'), 'r')
         csvreader = csv.reader(selected_data_csv)
         a=list(csvreader)
         index_num=0
@@ -164,7 +165,7 @@ def get_train_dataset(p, transform, to_augmented_dataset=False,seed=0,
                         to_neighbors_dataset=False, split=None,image_augmented_num=1):
     # Base dataset
     dataset=OUR_dataset(p,data_dir = p['data_dir'],#'data/ILSVRC2012_img_val',  #存放图片的路径
-                          data_csv_dir='/home/common/sunch/Error_TransFormer/data/selected_data_my.csv', #存放索引的路径
+                          data_csv_dir=os.path.join(p['root_path'],'data/selected_data.csv'), #存放索引的路径
                           mode='train',                          #选择生成的模式
                           img_num = p['img_num'],                          #每个类别挑选的图片数
                           transform = transform,
@@ -182,7 +183,7 @@ def get_val_dataset(p, transform, seed=0,
                         image_augmented_num=1):
     # Base dataset
     dataset=OUR_dataset(p,data_dir = p['data_dir'],#'data/ILSVRC2012_img_val',  #存放图片的路径
-                          data_csv_dir='/home/common/sunch/Error_TransFormer/data/selected_data_my.csv', #存放索引的路径
+                          data_csv_dir=os.path.join(p["root_path"],'data/selected_data.csv'), #存放索引的路径
                           mode='val',                          #选择生成的模式
                           img_num = p['img_num'],                          #每个类别挑选的图片数
                           transform = transform,

@@ -23,17 +23,17 @@ import pdb #pdb.set_trace()
 import os
 from torch.utils.data import Dataset
 import csv
-#state_dict = torch.hub.load_state_dict_from_url('https://s3.amazonaws.com/pytorch/models/resnet18-5c106cde.pth','/gdata/sunch/')
-#不能用：'resnext101_32x8d' 'densenet161', 'densenet121'  ,'alexnet'
+ 
 torch.backends.cudnn.benchmark = True
 #torch.cuda.set_device(1)
 
 class test_dataset(Dataset):
-    def __init__(self,   mode:str, img_num:tuple or int, transform,img_sum:int,group=0,data_dir='/home/common/sunch/Error_TransFormer/image_adv',
-                  seed=0, data_csv_dir='/home/common/sunch/Error_TransFormer/data/selected_data_my.csv'):
+    def __init__(self, p0,  mode:str, img_num:tuple or int, transform,img_sum:int,group=0,data_dir='~/Error_TransFormer_bithub/image_adv',
+                  seed=0, data_csv_dir='~/Error_TransFormer_bithub/data/selected_data_my.csv'):
         assert mode in ['train', 'val', 'base'], 'WRONG DATASET MODE'
         #assert img_num in [1,5,10,20], 'ONLY SUPPORT 2/10/20/40 IMAGES'
         super(test_dataset).__init__()
+        self.p0=p0
         self.mode = mode
         self.transform=transform
         self.group=group
@@ -41,7 +41,7 @@ class test_dataset(Dataset):
         self.seed=seed
         self.img_sum=img_sum        #一共挑取多少张图片
         self.img_num=img_num        #每个类别挑选的图像数量
-        label_csv = open('/home/common/sunch/Error_TransFormer/data/imagenet_label.csv', 'r')
+        label_csv = open(os.path.join(self.p0['root_path'],'/data/imagenet_label.csv'), 'r')
         label_reader = csv.reader(label_csv)
         label_ls = list(label_reader)
         self.label_ls = label_ls
@@ -63,7 +63,7 @@ class test_dataset(Dataset):
         return imgs_ls
     def img_ls(self, data_ls, sel_ls):# 该函数将图片一张张储存到imgs_ls中
         imgs_ls = []
-        selected_data_csv = open('/home/common/sunch/Error_TransFormer/data/csv/test_data.csv', 'r')
+        selected_data_csv = open(os.path.join(self.p0['root_path'],'/data/csv/test_data.csv'), 'r')
         csvreader = csv.reader(selected_data_csv)
         a=list(csvreader)
         index_num=0
@@ -92,11 +92,11 @@ class test_dataset(Dataset):
     def __len__(self):
         return len(self.imgs)
 
-def test_function(path_save_adv_image='/home/common/sunch/Error_TransFormer/image_adv',seed=0,group=0,
+def test_function(p0,path_save_adv_image='~/Error_TransFormer_bithub/image_adv',seed=0,group=0,
     c1=[  'vgg19_bn','inception_v3','resnet152', 'densenet161','squeezenet1_0','WRN','mobilenet_v2'],img_num=1,img_sum=1000,log_path='result.txt' ):
-    config_env='/home/common/sunch/Error_TransFormer/configs/env.yml'#/home/Unsupervised-Classification/
-    config_exp='/home/common/sunch/Error_TransFormer/configs/test/test.yml'
-    p = create_config(config_env,config_exp)
+    
+    config_exp=os.path.join(p0['root_path'],'/configs/test.yml')
+    p = create_config( config_exp)
     p["data_dir"]=path_save_adv_image
     p['img_num']= img_num
     p['img_sum']= img_sum
@@ -115,7 +115,9 @@ def test_function(path_save_adv_image='/home/common/sunch/Error_TransFormer/imag
                 transforms.CenterCrop(p['transformation_kwargs']['crop_size']),
                 transforms.ToTensor()])
                 #transforms.Normalize(**p['transformation_kwargs']['normalize'])])
-    train_dataset = test_dataset(data_dir = p['data_dir'],#'data/ILSVRC2012_img_val',  #存放图片的路径
+    train_dataset = test_dataset(
+                          p0=p0,                          
+                          data_dir = p['data_dir'],#'data/ILSVRC2012_img_val',  #存放图片的路径
                           mode='train',                          #选择生成的模式
                           img_num = p['img_num'],                          #每个类别挑选的图片数
                           transform = trans,
@@ -132,23 +134,10 @@ def test_function(path_save_adv_image='/home/common/sunch/Error_TransFormer/imag
     memory_bank_our.cuda()
     top2 = AverageMeter('Acc@1', ':6.2f')
     exact_list=["layer2"]
-    #weight_path = 'https://pl-bolts-weights.s3.us-east-2.amazonaws.com/simclr/bolts_simclr_imagenet/simclr_imagenet.ckpt'
-    #simclr = SimCLR.load_from_checkpoint('/home/common/sunch/Error_TransFormer/models/simclr_imagenet.ckpt', strict=False)
-
-    #----
-    #'inception_v3','googlenet',
-    c=['vgg16','vgg19','vgg19_bn','inception_v3','squeezenet1_0','resnet152','resnet18','resnet50','googlenet','mobilenet_v2','WRN',
-    'shufflenet_v2_x1_0','densenet161' ]
-    #'vgg19_bn','inception_v3','resnet152', 'densenet161',
-    c2=['adv_trained']
-    #'adv_trained',
-    if os.path.exists('/data/sunch/output/model/attack_result/checkpoint.pth.tar'):
-        checkpoint = torch.load('/data/sunch/output/model/attack_result/checkpoint.pth.tar', map_location='cpu')
-        i0=checkpoint['i']
-        acc=checkpoint['acc']
-    else:
-        acc = {}
-        i0=c[0]
+ 
+ 
+     
+    acc = {} 
     #modl=FeatureExtractor(model0,exact_list)
     for i in c1 :
         model = defend_model(i)
@@ -203,5 +192,5 @@ def test_function(path_save_adv_image='/home/common/sunch/Error_TransFormer/imag
         f.writelines('----------------------------------------------  \n')
 if __name__ == '__main__':
 
-    test_function(path_save_adv_image='/home/common/sunch/Error_TransFormer/images/image_adv',seed=1,
+    test_function(path_save_adv_image='~/Error_TransFormer_bithub/images/image_adv',seed=1,
     c1=['vgg19_bn','inception_v3','resnet152', 'densenet161','squeezenet1_0','WRN','mobilenet_v2'],img_num=1,img_sum=1000)

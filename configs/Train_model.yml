@@ -1,0 +1,72 @@
+# Setup
+setup: simclr
+
+#test
+img_sum: 1000
+data_dir:   /ILSVRC2012_img_val #/data/linshiqi047/imagenet/val #
+root_path:  /
+img_num: 1  #每一类挑选的图片数量
+
+#loss
+attack: ETF-C
+
+# Model
+backbone: resnet10 
+pretext_checkpoint: ~/Error_TransFormer_bithub/results/ETF-I/I_test.pth.tar
+head: mlp
+features_dim: 1000
+
+# Dataset
+train_db_name: our_data
+val_db_name: our_data
+num_classes: 5000
+true_num_classes: 1000
+
+seed: 0
+group: 0
+#image_augmented
+image_augmented_num: 1
+lamda: 0.5
+# Loss
+criterion: simclr
+criterion_kwargs:
+   temperature: 0.1 #0.005
+temperature: 0.1
+# Hyperparameters
+epochs: 500
+optimizer: sgd
+optimizer_kwargs:
+   nesterov: False
+   weight_decay: 0.0001
+   momentum: 0.9
+   lr: 0.4
+scheduler: cosine   #学习率调节的策略
+scheduler_kwargs:
+   lr_decay_rate: 0.1
+batch_size: 32
+num_workers: 32
+
+# Transformations
+augmentation_strategy: simclr
+augmentation_kwargs:
+   random_resized_crop:
+      size: 224
+      scale: [0.1, 1.0]
+   color_jitter_random_apply:
+      p: 0.8
+   color_jitter:
+      brightness: 0.4
+      contrast: 0.4
+      saturation: 0.4
+      hue: 0.1
+   random_grayscale:
+      p: 0.2
+   normalize:
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+
+transformation_kwargs:
+   crop_size: 224
+   normalize:
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]

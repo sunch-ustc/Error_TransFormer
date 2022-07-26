@@ -1,0 +1,17 @@
+FROM pytorch/pytorch:1.8.1-cuda11.1-cudnn8-runtime
+
+RUN sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list && \ 
+    PIP_INSTALL="python -m pip --no-cache-dir install --upgrade -i https://mirrors.aliyun.com/pypi/simple/" && \  
+
+# ==================================================================
+# python
+# ------------------------------------------------------------------
+    $PIP_INSTALL \
+        matplotlib\   
+        scipy\  
+       && \ 
+ldconfig && \
+    apt-get clean && \
+    apt-get autoremove && \
+    rm -rf /var/lib/apt/lists/* /tmp/* ~/*
+EXPOSE 3000

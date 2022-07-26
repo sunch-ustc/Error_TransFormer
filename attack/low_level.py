@@ -1,4 +1,4 @@
-from turtle import forward
+ 
 import torchvision.models as models
 import time
 import sys
