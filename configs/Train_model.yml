@@ -12,7 +12,7 @@ attack: ETF-C
 
 # Model
 backbone: resnet10 
-pretext_checkpoint: ~/Error_TransFormer_bithub/results/ETF-I/I_test.pth.tar
+lightweight_model: ~/Error_TransFormer_bithub/results/ETF-I/I_test.pth.tar
 head: mlp
 features_dim: 1000
 

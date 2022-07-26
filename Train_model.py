@@ -31,8 +31,8 @@ parser.add_argument("--temperature",  type=float,default=0.5)
 parser.add_argument("--seed",  type=int,default=0)
 parser.add_argument("--epochs",  type=int,default=500)
 parser.add_argument("--group",  type=int,default=0) 
-parser.add_argument("--pretext_checkpoint", dest='pretext_checkpoint', 
-      default="~/results/our_data/checkpoint.pth.tar" ,  type=str,help="pretext_checkpoint")
+parser.add_argument("--lightweight_model", dest='lightweight_model', 
+      default="~/results/our_data/checkpoint.pth.tar" ,  type=str,help="lightweight_model")
 parser.add_argument("--data_dir", dest='data_dir', 
       default="~/ILSVRC2012_img_val" ,  type=str,help="The path of ILSVRC2012_img_val")
 parser.add_argument("--root_path" ,  default="~/" ,type=str, help="The path of root")
@@ -75,9 +75,9 @@ def main():
     criterion = criterion.cuda()
     optimizer = get_optimizer(p, model) 
     # Checkpoint
-    if os.path.exists(p['pretext_checkpoint']):
+    if os.path.exists(p['lightweight_model']):
 
-        checkpoint = torch.load(p['pretext_checkpoint'], map_location='cpu')
+        checkpoint = torch.load(p['lightweight_model'], map_location='cpu')
         optimizer.load_state_dict(checkpoint['optimizer'])
         model.load_state_dict(checkpoint['model'])
         model.cuda()
@@ -104,7 +104,7 @@ def main():
         print('Checkpoint ...')
         model.eval()
         torch.save({'optimizer': optimizer.state_dict(), 'model': model.state_dict(),
-                    'epoch': epoch + 1}, p['pretext_checkpoint']) 
+                    'epoch': epoch + 1}, p['lightweight_model']) 
         
     """Print result"""
     train_acc = evaluate(train_dataloader,model)

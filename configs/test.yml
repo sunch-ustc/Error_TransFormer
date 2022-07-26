@@ -15,7 +15,7 @@ backbone: resnet18
 model_kwargs:
    head: mlp
    features_dim: 1000
-pretext_checkpoint: ~/Error_TransFormer_bithub/results/ETF-I/I_test.pth.tar
+lightweight_model: ~/Error_TransFormer_bithub/results/ETF-I/I_test.pth.tar
 # Dataset
 train_db_name: our_data
 val_db_name: our_data

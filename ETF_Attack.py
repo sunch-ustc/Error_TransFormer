@@ -28,7 +28,7 @@ def main(p,path_save_adv_image='~/image_adv',seed=0,layer=["layer1"]
                ):
     
     torch.backends.cudnn.benchmark = True 
-    print(p['pretext_checkpoint'])
+    print(p['lightweight_model'])
     print(p["backbone"])
     print(p["attack_method"])
     attack_method=p["attack_method"]
@@ -57,7 +57,7 @@ def main(p,path_save_adv_image='~/image_adv',seed=0,layer=["layer1"]
     model = torch.nn.DataParallel(model) 
     myexactor.cuda()
     myexactor = torch.nn.DataParallel(myexactor)  
-    checkpoint = torch.load(p['pretext_checkpoint'], map_location='cpu') 
+    checkpoint = torch.load(p['lightweight_model'], map_location='cpu') 
     model.load_state_dict(checkpoint['model'])
     
     for para in model.parameters():
@@ -99,7 +99,7 @@ def main(p,path_save_adv_image='~/image_adv',seed=0,layer=["layer1"]
 parser = argparse.ArgumentParser( )
 if __name__ == '__main__':
     parser.add_argument("--path_save_adv_image", default="~/Error_TransFormer_bithub/images/image_adv" ,  type=str)
-    parser.add_argument("--pretext_checkpoint",default="~/Error_TransFormer_bithub/results/ETF-I/I-resnet10_1k_seed1.pth.tar" ,  type=str)
+    parser.add_argument("--lightweight_model",default="~/Error_TransFormer_bithub/results/ETF-I/I-resnet10_1k_seed1.pth.tar" ,  type=str)
     parser.add_argument("--backbone",             default="resnet10" ,  type=str)
     parser.add_argument("--attack",             default="ETF-I" ,  type=str)
     parser.add_argument("--features_dim",     default=1000 ,  type=int)
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     """ """
     path_save_adv_image   =       os.path.join(args.root_path, '/images/image_adv')  
     p["backbone"]         =       args.backbone  
-    p['pretext_checkpoint']=       args.pretext_checkpoint  
+    p['lightweight_model']=       args.lightweight_model  
     p["attack"]           =       args.attack
     p["features_dim"]     =       args.features_dim
     p["criterion_kwargs"]["temperature"]=args.temperature 
