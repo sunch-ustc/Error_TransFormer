@@ -40,7 +40,7 @@ optimizer_kwargs:
 scheduler: cosine   #学习率调节的策略
 scheduler_kwargs:
    lr_decay_rate: 0.1
-batch_size: 20
+batch_size: 10
 num_workers: 16
 
 # Transformations
