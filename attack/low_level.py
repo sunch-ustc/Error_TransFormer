@@ -164,7 +164,7 @@ def low_level_target_PGD_sam_mid_to_mid(extractor,extractor2, images, guide_imag
     #  for crafting adv images
     watermark = torch.zeros_like(images).cuda()
 
-    #  for SAM
+ 
     s = images.clone()
     t = guide_image.clone()
     a = images.clone()
@@ -203,7 +203,7 @@ def low_level_target_PGD_sam_mid_to_mid(extractor,extractor2, images, guide_imag
             adv_h_feats = extractor2( adv_mid  + pert_a )
             loss= criterion(sou_h_feats, tar_h_feats, adv_h_feats)
             print("loss1:  "+ str(loss))
-            # craft perturbation in SAM
+            # craft perturbation in  
             loss.backward()
             if l_norm == 0:
                 grad_s = pert_s.grad 
