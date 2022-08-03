@@ -84,7 +84,7 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
     #  for crafting adv images
     watermark = torch.zeros_like(images).cuda()
 
-    #  for SAM
+ 
     s = images.clone()
     t = guide_image.clone()
     a = images.clone()
@@ -111,7 +111,7 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
             adv_h_feats = extractor(norm_layer(augment_layer(a + pert_a)))
             
             loss= criterion(sou_h_feats, tar_h_feats, adv_h_feats) 
-            # craft perturbation in SAM
+            # craft perturbation  
             loss.backward()
             if l_norm == 0:
                 grad_s = pert_s.grad 
