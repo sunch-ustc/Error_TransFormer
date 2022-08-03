@@ -73,16 +73,11 @@ def main(p,path_save_adv_image='~/image_adv',seed=0,layer=["layer1"]
         target = batch['index'].cuda(non_blocking=True)  
         order=np.arange(images.shape[0])[::-1]
         guide_image=images[order.copy()].detach()   
-        target=target[order.copy()].detach() 
-        
-        
         """Mount attacks"""
         if  attack_method == "Deep_PGD": 
             adv_images = Deep_PGD(model, images , target) 
         elif attack_method == "ETF_PGD":
-            adv_images = ETF_PGD(myexactor, images ,guide_image,eps=0.1,  iters=200  )  
-        
-   
+            adv_images = ETF_PGD(myexactor, images ,guide_image   )   
         """Save images"""
         save_dir = path_save_adv_image
         os.makedirs(save_dir , exist_ok=True) 
