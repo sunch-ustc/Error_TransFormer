@@ -23,7 +23,7 @@ You can train the lightweight surrogate model by yourself. We also provide a pre
 python /home/Error_TransFormer/Train_model.py --img_sum 1000   --img_num 1 --backbone resnet18 --batch_size 1000 \
                      --attack ETF-I \
                      --root_path  /home/Error_TransFormer   \
-                     --lightweight_model  /home/Error_TransFormer/results/ETF-I/I_test.pth.tar  --seed 1  \
+                     --lightweight_model  /home/Error_TransFormer/results/ETF-I/I-1.pth.tar  --seed 1  \
                      --data_dir             /home/ILSVRC2012_img_val
 ```
 ## Step two : Mount ETF Attacks 
