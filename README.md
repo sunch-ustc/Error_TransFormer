@@ -7,11 +7,11 @@ docker build -f Dockerfile_adv -t etf_images:0.1 .
 nvidia-docker run -it --name ETF_container -v /home/:/home/ -e NVIDIA_VISIBLE_DEVICES=0,1 --shm-size 32G   xxxxxxxxxx ("xxxxxxxxxx" refer to IMAGE ID)
 
 ```
-
+Please put the file Error_TransFormer in the home path. Or change the path below.
 
 ## Step one : Train lightweight surrogate model 
 
-You can train the lightweight surrogate model by yourself. We also provide a pre-trained model which is trained on the 1000 images from ImageNet validation.(/home/Error_TransFormer/results/ETF-I/I-1.pth.tar)
+You can train the lightweight surrogate model by yourself. We also provide a pre-trained model which is trained on the 1000 images from ImageNet validation.(/home/Error_TransFormer/results/ETF-I/I-1.pth.tar) Utilizing the provided model, you can go straight to the step two.
 
 Please provide the path of ILSVRC2012_img_val (--data_dir  )
 
