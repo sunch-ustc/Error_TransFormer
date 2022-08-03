@@ -95,7 +95,7 @@ class test_dataset(Dataset):
 def test_function(p0,path_save_adv_image='~/Error_TransFormer_bithub/image_adv',seed=0,group=0,
     c1=[  'vgg19_bn','inception_v3','resnet152', 'densenet161','squeezenet1_0','WRN','mobilenet_v2'],img_num=1,img_sum=1000,log_path='result.txt' ):
     
-    config_exp=os.path.join(p0['root_path'],'/configs/test.yml')
+    config_exp=os.path.join(p0['root_path'],'configs/test.yml')
     p = create_config( config_exp)
     p["data_dir"]=path_save_adv_image
     p['img_num']= img_num
