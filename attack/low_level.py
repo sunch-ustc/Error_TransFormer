@@ -65,7 +65,7 @@ def Deep_PGD(model, images , target,tp=0, eps=0.1, alpha=1 / 255, iters=200 ):
         img_x = images.data + images.data.new(images.size()).uniform_(-eps, eps)
         img_x.requires_grad = True
         f = model(norm_layer(img_x))
-        loss = - F.cross_entropy(f, target) 
+        loss =   F.cross_entropy(f, target) 
         loss.backward()
         images = images.data + alpha * img_x.grad.sign()
 
@@ -110,8 +110,7 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
             tar_h_feats = extractor(norm_layer(augment_layer(t + pert_t)))
             adv_h_feats = extractor(norm_layer(augment_layer(a + pert_a)))
             
-            loss= criterion(sou_h_feats, tar_h_feats, adv_h_feats)
-            print("loss1:  "+ str(loss))
+            loss= criterion(sou_h_feats, tar_h_feats, adv_h_feats) 
             # craft perturbation in SAM
             loss.backward()
             if l_norm == 0:
@@ -142,8 +141,7 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
         
         loss= criterion(sou_h_feats, tar_h_feats, adv_h_feats)
         
-        loss.backward()
-        print("loss2:  "+ str(loss))
+        loss.backward() 
         # update and clip
         grad = torch.sign(watermark.grad)
         watermark = watermark.detach() + alpha * grad
