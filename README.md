@@ -31,6 +31,7 @@ python /home/Error_TransFormer/Train_model.py --img_sum 1000   --img_num 1 --bac
 ```
 ## Step two : Mount ETF Attacks 
 We show the method of ETF_PGD, which attacks the shallow layers of the lightweight surrogate model. In contrast, you can use a PGD attack on the entire lightweight surrogate model using cross-entropy loss. 
+
 **Attack the shallow layers of the surrogate model.**
 ```
 python /home/Error_TransFormer/ETF_Attack.py --backbone resnet18  --img_sum 1000   --img_num 1 --batch_size 100 \
