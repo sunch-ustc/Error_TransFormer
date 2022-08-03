@@ -10,16 +10,18 @@ nvidia-docker run -it --name ETF_container -v /home/:/home/ -e NVIDIA_VISIBLE_DE
 
 
 ## Step one : Train lightweight surrogate model 
-```
-img_sum                 # The number of images
-img_num                 # The number of per categary
-attack_method           # options ETF_PGD  or  Deep_PGD 
-lightweight_model       # The location of model
-attack                  # ETF-I or ETF-C.  Train model using Instance classification or Contrastive learning
-```
-You can train the lightweight surrogate model by yourself. We also provide a pre-trained model which is trained on the 1000 images from ImageNet validation.
+
+You can train the lightweight surrogate model by yourself. We also provide a pre-trained model which is trained on the 1000 images from ImageNet validation.(/home/Error_TransFormer/results/ETF-I/I-1.pth.tar)
+
+Please provide the path of ILSVRC2012_img_val (--data_dir  )
 
 ```
+#--img_sum                  The number of images
+#--img_num                  The number of per categary
+#--attack_method            options ETF_PGD  or  Deep_PGD 
+#--lightweight_model        The location of model
+#--attack                   ETF-I or ETF-C.  Train model using Instance classification or Contrastive learning
+ 
 python /home/Error_TransFormer/Train_model.py --img_sum 1000   --img_num 1 --backbone resnet18 --batch_size 1000 \
                      --attack ETF-I \
                      --root_path  /home/Error_TransFormer   \
@@ -28,7 +30,7 @@ python /home/Error_TransFormer/Train_model.py --img_sum 1000   --img_num 1 --bac
 ```
 ## Step two : Mount ETF Attacks 
 ```
-python /home/Error_TransFormer/ETF_Attack.py --backbone resnet10  --img_sum 1000   --img_num 1 --batch_size 100 \
+python /home/Error_TransFormer/ETF_Attack.py --backbone resnet18  --img_sum 1000   --img_num 1 --batch_size 100 \
                 --root_path  /home/Error_TransFormer   \
                 --lightweight_model  /home/Error_TransFormer/results/ETF-I/I-1.pth.tar   --seed 1  \
                 --data_dir                /home/ILSVRC2012_img_val         \
