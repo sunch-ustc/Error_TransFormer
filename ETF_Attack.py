@@ -1,8 +1,5 @@
-import torchvision.models as models
-
-#from pl_bolts.models.self_supervised import SimCLR
-import argparse
- 
+import torchvision.models as models 
+import argparse 
 import sys
 import torch
 import torchvision.transforms as transforms
@@ -50,34 +47,38 @@ def main(p,path_save_adv_image='~/image_adv',seed=0,layer=["layer1"]
     memory_bank_our.cuda()
     
     
-    """Load model""" 
+    """Load model"""  
     model = get_model(p)  
-    myexactor = FeatureExtractor(model.backbone ,["layer1"]) 
+    myextractor = FeatureExtractor(model.backbone ,["layer1"]) 
     model.cuda()
     model = torch.nn.DataParallel(model) 
-    myexactor.cuda()
-    myexactor = torch.nn.DataParallel(myexactor)  
+    myextractor.cuda()
+    myextractor = torch.nn.DataParallel(myextractor)  
     checkpoint = torch.load(p['lightweight_model'], map_location='cpu') 
     model.load_state_dict(checkpoint['model'])
     
+    if attack_method == "Deep*_PGD": 
+        model = defend_model('resnet18')
+        model.cuda()
+        model = torch.nn.DataParallel(model) 
     for para in model.parameters():
         para.requires_grad = False
     model.eval()
-    myexactor.eval() 
-    tp=0
-
-    
-    for batch in train_dataloader: 
-        
+    myextractor.eval() 
+    tp=0 
+    for batch in train_dataloader:  
         images = batch['image'].cuda(non_blocking=True) 
-        target = batch['index'].cuda(non_blocking=True)  
+        target = batch['target'].cuda(non_blocking=True)  
+        
         order=np.arange(images.shape[0])[::-1]
         guide_image=images[order.copy()].detach()   
         """Mount attacks"""
-        if  attack_method == "Deep_PGD": 
+        if  attack_method in ["Deep_PGD","Deep*_PGD"]: 
             adv_images = Deep_PGD(model, images , target) 
+        elif attack_method == "Shallow_PGD":
+            adv_images = Shallow_PGD(myextractor, images ,guide_image  )   
         elif attack_method == "ETF_PGD":
-            adv_images = ETF_PGD(myexactor, images ,guide_image   )   
+            adv_images = ETF_PGD(myextractor, images ,guide_image  )   
         """Save images"""
         save_dir = path_save_adv_image
         os.makedirs(save_dir , exist_ok=True) 
