@@ -39,7 +39,7 @@ python /home/Error_TransFormer/ETF_Attack.py --backbone resnet18  --img_sum 1000
                 --root_path  /home/Error_TransFormer   \
                 --lightweight_model  /home/Error_TransFormer/results/ETF-I/I-1.pth.tar   --seed 1  \
                 --data_dir                /home/ILSVRC2012_img_val         \
-                --attack_method Deep_PGD
+                --attack_method Deep*_PGD
 ```             
 **Attack the whole surrogate model by the lightweight surrogate model trained on 1000 images.**     
 ```           
@@ -49,7 +49,7 @@ python /home/Error_TransFormer/ETF_Attack.py --backbone resnet18  --img_sum 1000
                 --data_dir                /home/ILSVRC2012_img_val         \
                 --attack_method Deep_PGD
 ```             
-**Attack the shallow layers of the surrogate model.**
+**Attack the shallow layers of the lightweight surrogate model.**
 ```
 python /home/Error_TransFormer/ETF_Attack.py --backbone resnet18  --img_sum 1000   --img_num 1 --batch_size 100 \
                 --root_path  /home/Error_TransFormer   \
@@ -57,7 +57,7 @@ python /home/Error_TransFormer/ETF_Attack.py --backbone resnet18  --img_sum 1000
                 --data_dir                /home/ILSVRC2012_img_val         \
                 --attack_method Shallow_PGD
 ```
-**Attack the shallow layers of the surrogate model.**
+**Attack the shallow layers of the lightweight surrogate model.**
 ```
 python /home/Error_TransFormer/ETF_Attack.py --backbone resnet18  --img_sum 1000   --img_num 1 --batch_size 100 \
                 --root_path  /home/Error_TransFormer   \
