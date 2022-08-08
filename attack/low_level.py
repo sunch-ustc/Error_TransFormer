@@ -9,8 +9,7 @@ import torch.nn.functional as F
  
 import scipy.stats as st
 sys.path.append('../') 
-from attack.model import norm_layer 
- 
+from attack.model import norm_layer  
 import pdb #pdb.set_trace() 
 
 def augment_layer(image ): 
@@ -154,106 +153,4 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
         watermark = a.data - images.data 
         
     return a
-def low_level_target_PGD_sam_mid_to_mid(extractor,extractor2, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
-                 l_norm =1,   rho=0.0001,skip=7,ratio=0.1):
-    # basic settings
-    
-    # 0: l2-norm; 1: linf-norm
-
-    # initialization
-    #  for crafting adv images
-    watermark = torch.zeros_like(images).cuda()
-
  
-    s = images.clone()
-    t = guide_image.clone()
-    a = images.clone()
-    rho_s = rho*ratio
-    rho_t = rho*ratio
-    rho_a = rho
-    # rho_s2 = rho2*ratio2
-    # rho_t2 = rho2*ratio2
-    # rho_a2 = rho2
-    conv1=extractor(norm_layer(augment_layer(s )))
-    
-    # the main loop
-    for i in range(int(iters)):
-        pert_s = torch.zeros_like(conv1).cuda()
-        pert_t = torch.zeros_like(conv1).cuda()
-        pert_a = torch.zeros_like(conv1).cuda()
-        pert_s_input = torch.zeros_like(s).cuda()
-        pert_t_input = torch.zeros_like(s).cuda()
-        pert_a_input = torch.zeros_like(s).cuda()
-        # the first step
-        if i % skip == 0:  # perform sam
-            # initialization
-            pert_s.requires_grad_()
-            pert_t.requires_grad_()
-            pert_a.requires_grad_() 
-            pert_s_input.requires_grad_()
-            pert_t_input.requires_grad_()
-            pert_a_input.requires_grad_() 
-            
-            # calculate loss
-            sou_mid = extractor(norm_layer(augment_layer(s + pert_s_input)))
-            tar_mid = extractor(norm_layer(augment_layer(t + pert_t_input)))
-            adv_mid = extractor(norm_layer(augment_layer(a + pert_a_input)))
-            sou_h_feats = extractor2( sou_mid  + pert_s  ) 
-            tar_h_feats = extractor2( tar_mid  + pert_t ) 
-            adv_h_feats = extractor2( adv_mid  + pert_a )
-            loss= criterion(sou_h_feats, tar_h_feats, adv_h_feats)
-            print("loss1:  "+ str(loss))
-            # craft perturbation in  
-            loss.backward()
-            if l_norm == 0:
-                grad_s = pert_s.grad 
-                pert_s = rho_s * grad_s / (torch.sum(grad_s ** 2, dim=(1,2,3), keepdim=True).sqrt()+1E-16) 
-                grad_t = pert_t.grad
-                pert_t = rho_t * grad_t / (torch.sum(grad_t ** 2, dim=(1,2,3), keepdim=True).sqrt()+1E-16) 
-                grad_a = pert_a.grad
-                pert_a = rho_a * grad_a / (torch.sum(grad_a ** 2, dim=(1,2,3), keepdim=True).sqrt()+1E-16)
-                
-                grad_s = pert_s_input.grad 
-                pert_s_input = rho_s * grad_s / (torch.sum(grad_s ** 2, dim=(1,2,3), keepdim=True).sqrt()+1E-16) 
-                grad_t = pert_t_input.grad
-                pert_t_input = rho_t * grad_t / (torch.sum(grad_t ** 2, dim=(1,2,3), keepdim=True).sqrt()+1E-16) 
-                grad_a = pert_a_input.grad
-                pert_a_input = rho_a * grad_a / (torch.sum(grad_a ** 2, dim=(1,2,3), keepdim=True).sqrt()+1E-16)
-            else:
-                pert_s = torch.sign(pert_s.grad)*rho_s
-                pert_t = torch.sign(pert_t.grad)*rho_t
-                pert_a = torch.sign(pert_a.grad)*rho_a
-                pert_s_input = torch.sign(pert_s_input.grad)*rho_s
-                pert_t_input = torch.sign(pert_t_input.grad)*rho_t
-                pert_a_input = torch.sign(pert_a_input.grad)*rho_a
-        
-        # the second step
-        watermark.requires_grad_()
-        if watermark.grad is not None:
-            watermark.grad.data.fill_(0)
-        extractor.zero_grad()
-
-        # calculate loss
-        sou_mid = extractor(norm_layer(augment_layer(s  - pert_s_input))).detach()
-        tar_mid = extractor(norm_layer(augment_layer(t  - pert_t_input))).detach()
-        adv_mid = extractor(norm_layer(augment_layer(s  - pert_a_input + watermark)))
-        sou_h_feats = extractor2( sou_mid  - pert_s  ).detach()
-        tar_h_feats = extractor2( tar_mid  - pert_t  ).detach()
-        adv_h_feats = extractor2( adv_mid  - pert_a  )
-        
-        loss= criterion(sou_h_feats, tar_h_feats, adv_h_feats)
-        loss.backward()
-        print("loss2:  "+ str(loss))
-        # update and clip
-        grad = torch.sign(watermark.grad)
-        watermark = watermark.detach() + alpha * grad
-        watermark = torch.where(watermark > (+ eps), torch.zeros_like(watermark).cuda() + eps, watermark)
-        watermark = torch.where(watermark < (- eps), torch.zeros_like(watermark).cuda() - eps, watermark)
-        
-        # updata adv images
-        a = images.data + watermark.data
-        a = torch.clamp(a, min=0, max=1)
-        watermark = a.data - images.data 
-        
-    return a 
-
