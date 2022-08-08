@@ -1,10 +1,5 @@
 from random import seed
-import torchvision.models as models
-
-#from pl_bolts.models.self_supervised import SimCLR
-
-#from offical_simclr import *
-
+import torchvision.models as models 
 import sys
 import torch
 import torchvision.transforms as transforms
@@ -24,14 +19,13 @@ import os
 from torch.utils.data import Dataset
 import csv
  
-torch.backends.cudnn.benchmark = True
-#torch.cuda.set_device(1)
+torch.backends.cudnn.benchmark = True 
 
 class test_dataset(Dataset):
     def __init__(self, p0,  mode:str, img_num:tuple or int, transform,img_sum:int,group=0,data_dir='~/Error_TransFormer_bithub/image_adv',
                   seed=0, data_csv_dir='~/Error_TransFormer_bithub/data/selected_data_my.csv'):
         assert mode in ['train', 'val', 'base'], 'WRONG DATASET MODE'
-        #assert img_num in [1,5,10,20], 'ONLY SUPPORT 2/10/20/40 IMAGES'
+    
         super(test_dataset).__init__()
         self.p0=p0
         self.mode = mode
@@ -39,15 +33,15 @@ class test_dataset(Dataset):
         self.group=group
         self.data_dir = data_dir
         self.seed=seed
-        self.img_sum=img_sum        #一共挑取多少张图片
-        self.img_num=img_num        #每个类别挑选的图像数量
+        self.img_sum=img_sum         
+        self.img_num=img_num        
         label_csv = open(os.path.join(self.p0['root_path'],'data/imagenet_label.csv'), 'r')
         label_reader = csv.reader(label_csv)
         label_ls = list(label_reader)
         self.label_ls = label_ls
         label = {}#EasyDict()
         index=0
-        for i in label_ls:  # 将标签都记录在self.label中
+        for i in label_ls:   
             label[i[0]] = (i[1:],index)
             index+=1
         self.label=label
@@ -59,9 +53,9 @@ class test_dataset(Dataset):
         imgs_ls = []
         sel_ls_init = list(range(self.img_num))
         sel_ls=[i+self.seed*self.img_num for i in sel_ls_init]
-        imgs_ls += self.img_ls(data_ls, sel_ls)#  sel_ls 是一个序列 比如最初给n_imgs付20  实际n_imgs为10   sel_ls就是 0 1 2 3 ... 9
+        imgs_ls += self.img_ls(data_ls, sel_ls) 
         return imgs_ls
-    def img_ls(self, data_ls, sel_ls):# 该函数将图片一张张储存到imgs_ls中
+    def img_ls(self, data_ls, sel_ls): 
         imgs_ls = []
         selected_data_csv = open(os.path.join(self.p0['root_path'],'data/csv/test_data.csv'), 'r')
         csvreader = csv.reader(selected_data_csv)
@@ -70,7 +64,7 @@ class test_dataset(Dataset):
         class_num=0
         n = int(self.img_sum / self.img_num)
         group = self.group
-        for label_ind in range(n * group, n * (group + 1)):#len(data_ls)是总的类别数
+        for label_ind in range(n * group, n * (group + 1)): 
             target=self.label[a[label_ind][0]][1]
             for img_ind in sel_ls:
                 imgs_ls.append([self.data_dir + '/' + a[label_ind][0] + '/' + a[label_ind][1 + img_ind],
@@ -117,13 +111,13 @@ def test_function(p0,path_save_adv_image='~/Error_TransFormer_bithub/image_adv',
                 #transforms.Normalize(**p['transformation_kwargs']['normalize'])])
     train_dataset = test_dataset(
                           p0=p0,                          
-                          data_dir = p['data_dir'],#'data/ILSVRC2012_img_val',  #存放图片的路径
-                          mode='train',                          #选择生成的模式
-                          img_num = p['img_num'],                          #每个类别挑选的图片数
+                          data_dir = p['data_dir'],#'data/ILSVRC2012_img_val',   
+                          mode='train',                         
+                          img_num = p['img_num'],                         
                           transform = trans,
                           seed=seed,
                           img_sum=p['img_sum'] ,
-                          group=group                           #一共挑选的图片综述数
+                          group=group                           
 )
     
     train_dataloader = torch.utils.data.DataLoader(train_dataset, num_workers=p['num_workers'],
@@ -167,14 +161,14 @@ def test_function(p0,path_save_adv_image='~/Error_TransFormer_bithub/image_adv',
             tp += 1
             if tp%50==49:
 
-                #print('Result of ' + i + ' evaluation is %.2f' % (top1.avg) + '% in '+str(tp)+' batch')
+               
                 acc[i]=top1.avg
                 acc['avg']=top2.avg
                 
         
         store='Result of ' + i + ' evaluation is %.2f' % (top1.avg) + '%'
         print(store)
-        with open(log_path, 'a') as f: # 写文件, 以行的方式写, 传列表格式
+        with open(log_path, 'a') as f:  
             f.writelines(store)
             f.writelines('\n')
             ''''''
@@ -186,7 +180,7 @@ def test_function(p0,path_save_adv_image='~/Error_TransFormer_bithub/image_adv',
     store='Result of  evaluation is %.2f' % (top2.avg)+'%'
     print(store)
 
-    with open(log_path, 'a') as f: # 写文件, 以行的方式写, 传列表格式
+    with open(log_path, 'a') as f:  
         f.writelines(store)
         f.writelines('\n')
         f.writelines('----------------------------------------------  \n')
