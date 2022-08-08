@@ -66,9 +66,7 @@ def defend_model(string):
 
 def save_attack_img(img, file_dir):
     T.ToPILImage()(img.data.cpu()).save(file_dir)
-
  
-# 中间特征提取
 class FeatureExtractor(torch.nn.Module):
     def __init__(self, submodule, extracted_layers):
         super(FeatureExtractor, self).__init__()
