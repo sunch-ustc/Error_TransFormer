@@ -60,6 +60,8 @@ def defend_model(string):
         model=models.densenet161(pretrained=True) 
     elif string == 'WRN':
         model = models.wide_resnet50_2(pretrained=True)  
+    elif string == 'resnet18':
+        model = models.resnet18(pretrained=True) 
     return model
 
 def save_attack_img(img, file_dir):
