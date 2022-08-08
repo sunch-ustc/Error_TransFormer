@@ -73,6 +73,32 @@ def Deep_PGD(model, images , target,tp=0, eps=0.1, alpha=1 / 255, iters=200 ):
         images = torch.clamp(images, min=0, max=1)
         img_x.grad.data = torch.zeros(img_x.shape).cuda()
     return images
+def Shallow_PGD(extractor, images,guide_image,   eps=0.1, alpha=1 / 255, iters=200 ):
+    
+    orig_images = images.clone()
+    orig_images.requires_grad = False
+    img_x = images.data
+    mid_f1=extractor(norm_layer(augment_layer( guide_image)))
+
+
+    for i in range(iters):
+        img_x = images.clone()
+        img_x.requires_grad = True
+        #MMD_Loss     low_level
+        mid_f=extractor(norm_layer( augment_layer(img_x)) )
+        loss_mse= torch.nn.MSELoss()(mid_f, mid_f1).mean()
+        
+        #ILA_Loss     High_level 
+        loss=loss_mse
+        print(loss)
+        loss.backward()
+        images = images.data - alpha * img_x.grad.sign()
+
+        images = torch.where(images > (orig_images + eps), orig_images + eps, images)
+        images = torch.where(images < (orig_images - eps), orig_images - eps, images)
+        images = torch.clamp(images, min=0, max=1)
+        img_x.grad.data = torch.zeros(img_x.shape).cuda()
+    return images
 def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200, 
                   l_norm =0,   rho=0.0001,skip=20,ratio=0.1):
     # basic settings
