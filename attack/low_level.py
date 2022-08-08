@@ -49,9 +49,10 @@ def Shallow_PGD(extractor, images,guide_image,   eps=0.1, alpha=1 / 255, iters=2
         img_x.requires_grad = True
         #MMD_Loss     low_level
         mid_f=extractor(norm_layer( augment_layer(img_x)) )
-        loss = torch.nn.MSELoss()(mid_f, mid_f1).mean()
+        loss_mse= torch.nn.MSELoss()(mid_f, mid_f1).mean()
         
-        #ILA_Loss     High_level  
+        #ILA_Loss     High_level 
+        loss=loss_mse 
         loss.backward()
         images = images.data - alpha * img_x.grad.sign()
 
@@ -75,7 +76,10 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
     rho_s = rho*ratio
     rho_t = rho*ratio
     rho_a = rho
+    B, C,  H, W = images.shape
+    B_plus, C,  H, W = augment_layer(images).shape
     
+    augmentation_num = int(B_plus / B)
     # the main loop
     for i in range(int(iters)):
         pert_s = torch.zeros_like(images).cuda()
@@ -90,9 +94,9 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
             pert_a.requires_grad_() 
             
             # calculate loss
-            sou_h_feats = extractor(norm_layer(augment_layer(s + pert_s)))
-            tar_h_feats = extractor(norm_layer(augment_layer(t + pert_t)))
-            adv_h_feats = extractor(norm_layer(augment_layer(a + pert_a)))
+            sou_h_feats = extractor(norm_layer(augment_layer(s + pert_s))).view(B, augmentation_num, -1)   
+            tar_h_feats = extractor(norm_layer(augment_layer(t + pert_t))).view(B, augmentation_num, -1) 
+            adv_h_feats = extractor(norm_layer(augment_layer(a + pert_a))).view(B, augmentation_num, -1) 
             
             loss= criterion(sou_h_feats, tar_h_feats, adv_h_feats) 
             # craft perturbation  
@@ -119,9 +123,9 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
         extractor.zero_grad()
 
         # calculate loss
-        sou_h_feats = extractor(norm_layer(augment_layer(s - pert_s))).detach()
-        tar_h_feats = extractor(norm_layer(augment_layer(t - pert_t))).detach()
-        adv_h_feats = extractor(norm_layer(augment_layer(s - pert_a + watermark)))
+        sou_h_feats = extractor(norm_layer(augment_layer(s - pert_s))).detach().view(B, augmentation_num, -1)   
+        tar_h_feats = extractor(norm_layer(augment_layer(t - pert_t))).detach().view(B, augmentation_num, -1)   
+        adv_h_feats = extractor(norm_layer(augment_layer(s - pert_a + watermark))).view(B, augmentation_num, -1)   
         
         loss= criterion(sou_h_feats, tar_h_feats, adv_h_feats)
         
@@ -163,16 +167,10 @@ def augment_layer(image ):
     image4=image4.unsqueeze(1)
     
     image=image.unsqueeze(1)
-    image_augment= torch.cat([image,image1,image2,image3,image4],dim=1)#
+    image_augment= torch.cat([image,image1,image2,image3,image4],dim=1) 
     image_augment=image_augment.view(-1, c, h, w)
     return image_augment
 def criterion(ori_mid, tar_mid, att_mid):
-    bs = ori_mid.shape[0]
-    ori_mid = ori_mid.view(bs, -1)
-    tar_mid = tar_mid.view(bs, -1)
-    att_mid = att_mid.view(bs, -1)
-    pert = att_mid - ori_mid
-    pert_target = tar_mid - ori_mid
-    pert_target = pert_target   / ( pert_target.norm(p=2,dim=1, keepdim=True) + 1e-12) 
-    loss = (pert * pert_target).sum() /  bs
+    cos=torch.nn.CosineSimilarity(dim=2, eps=1e-16) 
+    loss = torch.log( cos(att_mid , tar_mid).sum(dim=1)/cos(att_mid , ori_mid ).mean(dim=1)  ).sum() 
     return loss 
