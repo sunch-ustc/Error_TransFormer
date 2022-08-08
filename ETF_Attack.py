@@ -94,8 +94,8 @@ def main(p,path_save_adv_image='~/image_adv',seed=0,layer=["layer1"]
 
 parser = argparse.ArgumentParser( )
 if __name__ == '__main__':
-    parser.add_argument("--path_save_adv_image", default="~/Error_TransFormer_bithub/images/image_adv" ,  type=str)
-    parser.add_argument("--lightweight_model",default="~/Error_TransFormer_bithub/results/ETF-I/I-resnet10_1k_seed1.pth.tar" ,  type=str)
+    parser.add_argument("--path_save_adv_image", default="~/Error_TransFormer/images/image_adv" ,  type=str)
+    parser.add_argument("--lightweight_model",default="/home/Error_TransFormer/results/ETF-I/I-1.pth.tar" ,  type=str)
     parser.add_argument("--backbone",             default="resnet10" ,  type=str)
     parser.add_argument("--attack",             default="ETF-I" ,  type=str)
     parser.add_argument("--features_dim",     default=1000 ,  type=int)
