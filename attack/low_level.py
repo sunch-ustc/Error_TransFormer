@@ -47,7 +47,7 @@ def Shallow_PGD(extractor, images,guide_image,   eps=0.1, alpha=1 / 255, iters=2
     for i in range(iters):
         img_x = images.clone()
         img_x.requires_grad = True
-        #MMD_Loss     low_level
+        #MSE_Loss     low_level
         mid_f=extractor(norm_layer( augment_layer(img_x)) )
         loss_mse= torch.nn.MSELoss()(mid_f, mid_f1).mean()
         
