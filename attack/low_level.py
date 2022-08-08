@@ -62,7 +62,7 @@ def Shallow_PGD(extractor, images,guide_image,   eps=0.1, alpha=1 / 255, iters=2
         img_x.grad.data = torch.zeros(img_x.shape).cuda()
     return images
 def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200, 
-                  l_norm =0,   rho=0.0001,skip=20,ratio=0.1):
+                  l_norm =1,   rho=1,skip=7,ratio=1):
     # basic settings
      
     # 0: l2-norm; 1: linf-norm
@@ -111,9 +111,9 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
                 grad_a = pert_a.grad
                 pert_a = rho_a * grad_a / (torch.sum(grad_a ** 2, dim=(1,2,3), keepdim=True).sqrt()+1E-16)
             else:
-                pert_s = torch.sign(pert_s.grad)
-                pert_t = torch.sign(pert_t.grad)
-                pert_a = torch.sign(pert_a.grad)
+                pert_s = rho_s *torch.sign(pert_s.grad)
+                pert_t = rho_t *torch.sign(pert_t.grad)
+                pert_a = rho_a *torch.sign(pert_a.grad)
 
         
         # the second step
