@@ -12,44 +12,7 @@ sys.path.append('../')
 from attack.model import norm_layer  
 import pdb #pdb.set_trace() 
 
-def augment_layer(image ): 
-    '''
-    input:    image             (bitchsize, channal, w , h  ) 
-    
-    output:   image_augment     (bitchsize, augment_num, channal, w , h  ) 
-    '''
-    b, c, h, w = image.size()
-    #image1  
-    image1=TF.adjust_brightness(image,1.5) 
-    image1=TF.adjust_hue(image1,0.3)   #[-0.5,0.5]
-    image1=image1.unsqueeze(1)
-    #image2  
-    image2=TF.hflip(image)
-    image2=TF.adjust_contrast(image2,0.5) 
-    image2=image2.unsqueeze(1)
-    #image3 # i, j, h, w, self.size, self.interpolation)
-    image3=TF.resized_crop(image, int(h/4), int(w/4), int(h/2), int(w/2),  (224,224) )
-    image3=TF.adjust_brightness(image3,0.6)
-    image3=image3.unsqueeze(1)
-    #image4
-    image4=TF.rgb_to_grayscale(image, num_output_channels=3)
-    image4=TF.adjust_saturation(image4,2)
-    image4=image4.unsqueeze(1)
-    
-    image=image.unsqueeze(1)
-    image_augment= torch.cat([image,image1,image2,image3,image4],dim=1)#
-    image_augment=image_augment.view(-1, c, h, w)
-    return image_augment
-def criterion(ori_mid, tar_mid, att_mid):
-    bs = ori_mid.shape[0]
-    ori_mid = ori_mid.view(bs, -1)
-    tar_mid = tar_mid.view(bs, -1)
-    att_mid = att_mid.view(bs, -1)
-    pert = att_mid - ori_mid
-    pert_target = tar_mid - ori_mid    
-    pert_target = pert_target  
-    loss = (pert * pert_target).sum() / bs
-    return loss 
+
     
 def Deep_PGD(model, images , target,tp=0, eps=0.1, alpha=1 / 255, iters=200 ):
       
@@ -61,7 +24,7 @@ def Deep_PGD(model, images , target,tp=0, eps=0.1, alpha=1 / 255, iters=200 ):
  
     for i in range(iters):
         img_x = images.clone()
-        img_x = images.data + images.data.new(images.size()).uniform_(-eps, eps)
+        #img_x = images.data + images.data.new(images.size()).uniform_(-eps, eps)
         img_x.requires_grad = True
         f = model(norm_layer(img_x))
         loss =   F.cross_entropy(f, target) 
@@ -86,11 +49,9 @@ def Shallow_PGD(extractor, images,guide_image,   eps=0.1, alpha=1 / 255, iters=2
         img_x.requires_grad = True
         #MMD_Loss     low_level
         mid_f=extractor(norm_layer( augment_layer(img_x)) )
-        loss_mse= torch.nn.MSELoss()(mid_f, mid_f1).mean()
+        loss = torch.nn.MSELoss()(mid_f, mid_f1).mean()
         
-        #ILA_Loss     High_level 
-        loss=loss_mse
-        print(loss)
+        #ILA_Loss     High_level  
         loss.backward()
         images = images.data - alpha * img_x.grad.sign()
 
@@ -107,9 +68,7 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
 
     # initialization
     #  for crafting adv images
-    watermark = torch.zeros_like(images).cuda()
-
- 
+    watermark = torch.zeros_like(images).cuda() 
     s = images.clone()
     t = guide_image.clone()
     a = images.clone()
@@ -179,4 +138,41 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
         watermark = a.data - images.data 
         
     return a
- 
+def augment_layer(image ): 
+    '''
+    input:    image             (bitchsize, channal, w , h  ) 
+    
+    output:   image_augment     (bitchsize, augment_num, channal, w , h  ) 
+    '''
+    b, c, h, w = image.size()
+    #image1  
+    image1=TF.adjust_brightness(image,1.5) 
+    image1=TF.adjust_hue(image1,0.3)   #[-0.5,0.5]
+    image1=image1.unsqueeze(1)
+    #image2  
+    image2=TF.hflip(image)
+    image2=TF.adjust_contrast(image2,0.5) 
+    image2=image2.unsqueeze(1)
+    #image3 # i, j, h, w, self.size, self.interpolation)
+    image3=TF.resized_crop(image, int(h/4), int(w/4), int(h/2), int(w/2),  (224,224) )
+    image3=TF.adjust_brightness(image3,0.6)
+    image3=image3.unsqueeze(1)
+    #image4
+    image4=TF.rgb_to_grayscale(image, num_output_channels=3)
+    image4=TF.adjust_saturation(image4,2)
+    image4=image4.unsqueeze(1)
+    
+    image=image.unsqueeze(1)
+    image_augment= torch.cat([image,image1,image2,image3,image4],dim=1)#
+    image_augment=image_augment.view(-1, c, h, w)
+    return image_augment
+def criterion(ori_mid, tar_mid, att_mid):
+    bs = ori_mid.shape[0]
+    ori_mid = ori_mid.view(bs, -1)
+    tar_mid = tar_mid.view(bs, -1)
+    att_mid = att_mid.view(bs, -1)
+    pert = att_mid - ori_mid
+    pert_target = tar_mid - ori_mid
+    pert_target = pert_target   / ( pert_target.norm(p=2,dim=1, keepdim=True) + 1e-12) 
+    loss = (pert * pert_target).sum() /  bs
+    return loss 
