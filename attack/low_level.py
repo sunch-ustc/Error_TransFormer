@@ -123,9 +123,9 @@ def ETF_PGD(extractor, images, guide_image, eps=0.1, alpha=1 / 255, iters=200,
         extractor.zero_grad()
 
         # calculate loss
-        sou_h_feats = extractor(norm_layer(augment_layer(s - pert_s))).detach().view(B, augmentation_num, -1)   
-        tar_h_feats = extractor(norm_layer(augment_layer(t - pert_t))).detach().view(B, augmentation_num, -1)   
-        adv_h_feats = extractor(norm_layer(augment_layer(s - pert_a + watermark))).view(B, augmentation_num, -1)   
+        sou_h_feats = extractor(norm_layer(augment_layer(s + pert_s))).detach().view(B, augmentation_num, -1)   
+        tar_h_feats = extractor(norm_layer(augment_layer(t + pert_t))).detach().view(B, augmentation_num, -1)   
+        adv_h_feats = extractor(norm_layer(augment_layer(s + pert_a + watermark))).view(B, augmentation_num, -1)   
         
         loss= criterion(sou_h_feats, tar_h_feats, adv_h_feats)
         
